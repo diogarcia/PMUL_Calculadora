@@ -15,16 +15,26 @@ import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+/**
+ * @author dioga
+ * @version 1.0
+ * @since 2024
+ *
+ *
+ * **/
 
 public class MainActivity extends AppCompatActivity {
 
-    //TODO THIS IS A TEST
+    private Calculadora calculadora;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
+        calculadora = new Calculadora();
+
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -32,9 +42,13 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        //Declarción componente
         MaterialButton btnClear = findViewById(R.id.buttonClear);
         MaterialButton btnPlus = findViewById(R.id.buttonPlus);
         MaterialButton btnEqual = findViewById(R.id.buttonEqual);
+        MaterialButton btnMult = findViewById(R.id.buttonMult);
+        MaterialButton btnMinus = findViewById(R.id.buttonMinus);
+        MaterialButton btnDiv = findViewById(R.id.buttonDiv);
 
         TextView pantalla = findViewById(R.id.textView);
 
@@ -50,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         botonesNumeros.add(R.id.button8);
         botonesNumeros.add(R.id.button9);
 
+        //LISTENERS
         btnClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -64,19 +79,53 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnMult.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pantalla.append("*");
+            }
+        });
+
+        btnMinus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pantalla.append("-");
+            }
+        });
+
+        btnDiv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pantalla.append("/");
+            }
+        });
+
         btnEqual.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String strScreen = pantalla.getText().toString();
-                boolean strOK = isGoodString(strScreen);
 
-                if(!strOK){
-                    pantalla.setText("-1");
-                    Toast.makeText(getApplicationContext(), "Secuencia erronea pulsa 'C'", Toast.LENGTH_SHORT).show();
+                boolean strOK = StringVerifier.isGoodString(strScreen);
+
+                if(!strOK){ //Cambio la estrategia y muestro '0' (+ toast) en caso de error para poder abordar operaciones de resta..
+                    pantalla.setText("");
+                    Toast.makeText(getApplicationContext(), "Secuencia erronea. SIN OPERADORES UNARIOS!", Toast.LENGTH_SHORT).show();
                 } else {
 
-                    int result = calculate(strScreen);
-                    pantalla.setText(String.valueOf(result));
+                    double result = 0.0d;
+
+                    try{
+                        result = calculadora.calculate(strScreen);
+
+                        if(result % 1 != 0) pantalla.setText(String.valueOf(result));
+                        else{
+                            int intResult = (int) result;
+                            pantalla.setText(String.valueOf(intResult));
+                        }
+                    }catch (ArithmeticException ex){
+                        Toast.makeText(getApplicationContext(), "ERROR: División por 0. Vuelve a comenzar!", Toast.LENGTH_SHORT).show();
+                        pantalla.setText("");
+                    }
                 }
             }
         });
@@ -97,30 +146,5 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private int calculate(String cadena){
 
-        if(!cadena.contains("+")){
-            return Integer.parseInt(cadena);
-        }else{
-            String [] cortes = cadena.split("\\+",2);
-            String cad1 = cortes[0];
-            String cad2 = cortes[1];
-
-            return calculate(cad1) + calculate(cad2);
-        }
-    }
-
-    private boolean isGoodString(String cadena) {
-
-        if (cadena.equals("")) return false;
-        if (cadena.contains("++")) return false;
-
-        for(int i = 0; i<cadena.length(); i++){
-            if(cadena.charAt(i) != '+' && !Character.isDigit(cadena.charAt(i))){
-                return false;
-            }
-        }
-
-        return true;
-    }
 }

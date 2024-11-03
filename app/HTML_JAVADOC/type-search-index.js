@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"com.example.calculadoraa","l":"Calculadora"},{"p":"com.example.calculadoraa","l":"MainActivity"},{"p":"com.example.calculadoraa","l":"StringVerifier"}];updateSearchResults();
